@@ -1,3 +1,4 @@
+#Sloeber created workaound file V1.00.test 11
 name=ESP32 Arduino 4.2
 version=2.0.0
 
