@@ -58,7 +58,9 @@
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "config.h"
 #else
-#include MBEDTLS_CONFIG_FILE
+#define VAL(str) #str
+#define TOSTRING(str) VAL(str)
+#include TOSTRING(MBEDTLS_CONFIG_FILE)
 #endif
 
 #include <stddef.h>
