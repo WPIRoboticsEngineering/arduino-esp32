@@ -15,9 +15,9 @@ tools.esptool_py.network_cmd.windows="{runtime.platform.path}/tools/espota.exe"
 tools.gen_esp32part.cmd=python "{runtime.platform.path}/tools/gen_esp32part.py"
 tools.gen_esp32part.cmd.windows="{runtime.platform.path}/tools/gen_esp32part.exe"
 
-compiler.path={runtime.tools.xtensa-{build.mcu}-elf-gcc.path}/bin/
-compiler.sdk.path={runtime.platform.path}/tools/sdk/{build.mcu}
-compiler.prefix=xtensa-{build.mcu}-elf-
+compiler.path={runtime.tools.xtensa-esp32-elf-gcc.path}/bin/
+compiler.sdk.path={runtime.platform.path}/tools/sdk/esp32
+compiler.prefix=xtensa-esp32-elf-
 
 #
 # ESP32 Support Start
@@ -50,13 +50,13 @@ build.extra_flags.esp32s2=-DARDUINO_SERIAL_PORT={build.serial}
 #
 
 # Compile Flags
-compiler.cpreprocessor.flags={compiler.cpreprocessor.flags.{build.mcu}}
-compiler.c.flags={compiler.c.flags.{build.mcu}}
-compiler.cpp.flags={compiler.cpp.flags.{build.mcu}}
-compiler.S.flags={compiler.S.flags.{build.mcu}}
-compiler.c.elf.flags={compiler.c.elf.flags.{build.mcu}}
-compiler.c.elf.libs={compiler.c.elf.libs.{build.mcu}}
-compiler.ar.flags={compiler.ar.flags.{build.mcu}}
+compiler.cpreprocessor.flags={compiler.cpreprocessor.flags.esp32}
+compiler.c.flags={compiler.c.flags.esp32}
+compiler.cpp.flags={compiler.cpp.flags.esp32}
+compiler.S.flags={compiler.S.flags.esp32}
+compiler.c.elf.flags={compiler.c.elf.flags.esp32}
+compiler.c.elf.libs={compiler.c.elf.libs.esp32}
+compiler.ar.flags={compiler.ar.flags.esp32}
 
 # Compilers
 compiler.c.cmd={compiler.prefix}gcc
@@ -92,7 +92,7 @@ build.code_debug=0
 build.defines=
 build.loop_core=
 build.event_core=
-build.extra_flags=-DESP32 -DCORE_DEBUG_LEVEL={build.code_debug} {build.loop_core} {build.event_core} {build.defines} {build.extra_flags.{build.mcu}}
+build.extra_flags=-DESP32 -DCORE_DEBUG_LEVEL={build.code_debug} {build.loop_core} {build.event_core} {build.defines} {build.extra_flags.esp32}
 
 # Check if custom partitions exist
 recipe.hooks.prebuild.1.pattern=bash -c "[ ! -f {build.source.path}/partitions.csv ] || cp -f {build.source.path}/partitions.csv {build.path}/partitions.csv"
@@ -119,12 +119,12 @@ recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" "-Wl,--Map={build
 recipe.objcopy.partitions.bin.pattern={tools.gen_esp32part.cmd} -q "{build.path}/partitions.csv" "{build.path}/{build.project_name}.partitions.bin"
 
 ## Create bin
-recipe.objcopy.bin.pattern="{tools.esptool_py.path}/{tools.esptool_py.cmd}" --chip {build.mcu} elf2image --flash_mode "{build.flash_mode}" --flash_freq "{build.flash_freq}" --flash_size "{build.flash_size}" -o "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.elf"
-recipe.objcopy.bin.pattern.linux=python "{tools.esptool_py.path}/{tools.esptool_py.cmd}" --chip {build.mcu} elf2image --flash_mode "{build.flash_mode}" --flash_freq "{build.flash_freq}" --flash_size "{build.flash_size}" -o "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.elf"
+recipe.objcopy.bin.pattern="{tools.esptool_py.path}/{tools.esptool_py.cmd}" --chip esp32 elf2image --flash_mode "{build.flash_mode}" --flash_freq "{build.flash_freq}" --flash_size "{build.flash_size}" -o "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.elf"
+recipe.objcopy.bin.pattern.linux=python "{tools.esptool_py.path}/{tools.esptool_py.cmd}" --chip esp32 elf2image --flash_mode "{build.flash_mode}" --flash_freq "{build.flash_freq}" --flash_size "{build.flash_size}" -o "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.elf"
 
 ## Save bin
-recipe.output.tmp_file={build.project_name}.{build.mcu}.bin
-recipe.output.save_file={build.project_name}.{build.mcu}.{build.variant}.bin
+recipe.output.tmp_file={build.project_name}.esp32.bin
+recipe.output.save_file={build.project_name}.esp32.{build.variant}.bin
 
 ## Compute size
 recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
@@ -136,6 +136,6 @@ recipe.size.regex.data=^(?:\.dram0\.data|\.dram0\.bss|\.noinit)\s+([0-9]+).*
 tools.esptool_py.upload.protocol=esp32
 tools.esptool_py.upload.params.verbose=
 tools.esptool_py.upload.params.quiet=
-tools.esptool_py.upload.pattern="{path}/{cmd}" --chip {build.mcu} --port "{serial.port}" --baud {upload.speed} {upload.flags} --before default_reset --after hard_reset write_flash -z --flash_mode {build.flash_mode} --flash_freq {build.flash_freq} --flash_size detect 0xe000 "{runtime.platform.path}/tools/partitions/boot_app0.bin" 0x1000 "{runtime.platform.path}/tools/sdk/{build.mcu}/bin/bootloader_{build.boot}_{build.flash_freq}.bin" 0x10000 "{build.path}/{build.project_name}.bin" 0x8000 "{build.path}/{build.project_name}.partitions.bin"
-tools.esptool_py.upload.pattern.linux=python "{path}/{cmd}" --chip {build.mcu} --port "{serial.port}" --baud {upload.speed} {upload.flags} --before default_reset --after hard_reset write_flash -z --flash_mode {build.flash_mode} --flash_freq {build.flash_freq} --flash_size detect 0xe000 "{runtime.platform.path}/tools/partitions/boot_app0.bin" 0x1000 "{runtime.platform.path}/tools/sdk/{build.mcu}/bin/bootloader_{build.boot}_{build.flash_freq}.bin" 0x10000 "{build.path}/{build.project_name}.bin" 0x8000 "{build.path}/{build.project_name}.partitions.bin"
+tools.esptool_py.upload.pattern="{path}/{cmd}" --chip esp32 --port "{serial.port}" --baud {upload.speed} {upload.flags} --before default_reset --after hard_reset write_flash -z --flash_mode {build.flash_mode} --flash_freq {build.flash_freq} --flash_size detect 0xe000 "{runtime.platform.path}/tools/partitions/boot_app0.bin" 0x1000 "{runtime.platform.path}/tools/sdk/esp32/bin/bootloader_{build.boot}_{build.flash_freq}.bin" 0x10000 "{build.path}/{build.project_name}.bin" 0x8000 "{build.path}/{build.project_name}.partitions.bin"
+tools.esptool_py.upload.pattern.linux=python "{path}/{cmd}" --chip esp32 --port "{serial.port}" --baud {upload.speed} {upload.flags} --before default_reset --after hard_reset write_flash -z --flash_mode {build.flash_mode} --flash_freq {build.flash_freq} --flash_size detect 0xe000 "{runtime.platform.path}/tools/partitions/boot_app0.bin" 0x1000 "{runtime.platform.path}/tools/sdk/esp32/bin/bootloader_{build.boot}_{build.flash_freq}.bin" 0x10000 "{build.path}/{build.project_name}.bin" 0x8000 "{build.path}/{build.project_name}.partitions.bin"
 tools.esptool_py.upload.network_pattern={network_cmd} -i "{serial.port}" -p "{network.port}" "--auth={network.password}" -f "{build.path}/{build.project_name}.bin"
